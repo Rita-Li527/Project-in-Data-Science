@@ -1,0 +1,169 @@
+---
+title: 'FP1'
+author: "Jenny Li"
+output: 
+  html_document:
+    keep_md: TRUE
+    toc: TRUE
+    toc_float: TRUE
+    df_print: paged
+    code_download: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, error=TRUE, message=FALSE, warning=FALSE)
+```
+## Project Area
+Public Transportation
+
+## Members
+Jenny, Pippa, Rita
+
+
+## Research question
+- Where are there gaps in a public transportation system?
+- What are the connections between public transport systems and    environmental protection and emissions? 
+- How much money the government spends (or future spends) on transportation based on energy cost ?
+
+## Dataset
+```{r libraries}
+library(tidyverse)     # for graphing and data cleaning
+library(lubridate)     # for date manipulation
+library(ggthemes)      # for even more plotting themes
+library(dplyr)
+library(maps)          # for map data
+library(ggmap)         # for mapping points on maps
+library(RColorBrewer)  # for color palettes
+library(sf)            # for working with spatial data
+library(readr)
+library(readxl)
+library(imputeTS)
+library(plotly)
+Sys.setlocale("LC_TIME", "English")
+theme_set(theme_minimal())
+```
+
+### Data 1
+```{r data1}
+calendar<-read.delim('calendar_dates.txt', sep=',')
+stop_times<-read.delim('stop_times.txt', sep=',')
+stops<-read.delim('stops.txt', sep=',')
+trips<-read.delim('trips.txt', sep=',')
+routes<-read.delim('routes.txt', sep=',')
+```
+
+#### Clean Data
+```{r}
+newTrips <- trips %>%
+  select(-trip_long_name:-bikes_allowed)
+newStop <- stops %>% 
+  select(-location_type:-zone_id)
+newRoutes<-routes %>% 
+  select(c(route_id,route_long_name))
+newStopTimes<- stop_times %>% 
+  select(-stop_headsign) %>% 
+  select(-pickup_type:-fare_units_traveled) 
+newCalendar <- calendar %>% 
+  select(-exception_type)
+```
+
+#### Combine Data
+```{r}
+walloonTransit<-newStopTimes %>% 
+  left_join(newStop,by="stop_id") %>% 
+  left_join(newTrips, by="trip_id") %>% 
+  left_join(newCalendar, by="service_id") %>% 
+  left_join(newRoutes, by="route_id") %>% 
+  filter(date > 20180731& arrival_time<"06:00:00")
+```
+
+#### Data Source
+[TEC](http://gtfs.ovapi.nl/tec/gtfs-tec-latest.zip)
+
+#### Data Description
+Transit data such as stop locations, scheduled times and dates, etc.
+
+#### Data Limitation
+The data was collected 4 years ago. Thus is a little outdated and the data does not contain the measure passenger flow. Also, since the dataset is too large, I decided to limit it to the early hours of each day in August.
+
+#### Variables
+```{r}
+head(walloonTransit)
+```
+
+stop_lon and stop_lat including the arrival_time of the trips are interesting. The stop_lon and stop_lat are basically the lontitude and latitude of each stop and arrival_time is the time when the train arrivals at the stop.
+
+#### Visualization
+```{r, fig.alt="map for the stops"}
+mapStops <- get_stamenmap(
+  bbox = c(left = 2, bottom = 49.4, right = 6, top = 51), 
+  maptype = "toner",
+  zoom = 12)
+
+ggmap(mapStops) +
+  geom_point(
+    data = walloonTransit,
+    aes(x = stop_lon, y = stop_lat),
+    alpha = .3,
+    size = .1,
+    color = "maroon4"
+  ) +
+  labs(title = "Stops In Wallon Belgium")
+```
+
+#### Join Variables
+All the variables including "id" would be possible to join with other dataset, such as trip_id or route_id.
+
+### Data 2
+
+```{r}
+energyUse<- read_excel("Energy Use.xls", sheet="Data") %>% 
+  na_replace(0) %>% pivot_longer(
+                cols = c("1960":"2021"),
+                names_to = "year",
+                values_to = "country_energy_used"
+)
+```
+
+#### Data Source
+[OECD](https://data.worldbank.org/indicator/EG.USE.PCAP.KG.OE)
+
+#### Data Description
+Energy use (kg of oil equivalent per capita) by countries since 1960 through 2015.
+
+#### Data Limitation
+The data was collected 6 years ago. Thus is a little outdated and the data only contains one kind of energy that is used by countries. In addition, some of the data is missing.
+
+#### Variables
+```{r}
+head(energyUse)
+```
+
+Country Name, year and country_energy_used are the three interesting variables in this dataset. Country Name refers to the name of the country, year refers to year and country_energy_used refers to the use of energy (kg of oil equivalent per capita) by each country.
+
+#### Visualizaiton
+```{r, fig.alt="Energy Comsuption By Countries"}
+energyUseGraph<- energyUse %>%
+  ggplot(aes(x = year, y = country_energy_used)) +
+  labs(title = "Energy Comsuption By Countries", y = "Comsuption (kg of oil equivalent per capita)", x =
+         NULL) +
+  geom_point(aes(color = `Country Name`)) +
+  theme(
+    plot.title = element_text (hjust = 0.5,
+                               face = "bold",
+                               size = 11),
+    axis.text.x = element_text(
+      size = 6,
+      angle = -90,
+      hjust = 0
+    ),
+    panel.grid.major.x  = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    legend.position = 'none'
+  )
+
+ggplotly(energyUseGraph, tooltip = c("Country Name","colour") )
+```
+
+#### Join Variables
+Country Name, Country Code and year are possible to join with other dataset.
