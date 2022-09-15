@@ -1,0 +1,95 @@
+---
+title: "Projects in DS: FP1 - Define and Refine Your Research Questions"
+output: html_document
+date: "2022-09-13"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse) 
+view(table3)
+table3 <- as.data.frame(table3)
+```
+
+## Research Questions
+
+#Predict the price of public transportation based on gas/electricity prices, geography of city, median income of public, empty rate, bus speed, how much money the government spends on transportation etc 
+
+#Where are there gaps in a public transportation system?
+
+#What are the connections between public transport systems and environmental protection and emissions? 
+
+## Table 3 
+# Data source (who created it?)
+# The U.S. Enegry Information Association created this data set. 
+# Data description - what’s being measured?
+# This data set is meauring the amount of carbon dioxide emitted across all sectors, including residential, commercial etc, in each state. 
+# Data limitations (eg: are the data recent? do they contain all the variables you might want?)
+# This data set certainly does not include every variable we would need to answer those reaserch questions but is a good overall estimate of the effects of transportation on greenhouse emissions in comparioson to other industries. This data is from 2019 but published recently so it might be the newest the EIA could provide. 
+# Show the variable names. Describe the most useful / interesting ones.
+```{r}
+table3[3,]
+```
+# We would be focusing on the varibale for transportation and I think the variables in "shares" are the most useful as they show the ratio of carbon dioxide transportation emits in a state's total emissions. 
+# Visualize one interesting variable.
+```{r}
+names(table3) <- NULL
+```
+
+
+```{r}
+head(table3)
+```
+```{r}
+names(table3) <- c("States", "Commercial1", "Electric1", "Residential1", "Industrial1","Trans1","Total1","NA",
+                   "Commercial2", "Electric2", "Residential2", "Industrial2","Trans2")
+head(table3)
+```
+
+
+```{r}
+table3 %>% 
+  filter(States %in% c("California","New York","Minnesota","Texas")) %>% 
+    ggplot() + 
+    geom_jitter(aes(x= States 
+  ,y=as.numeric(Trans2)))
+
+```
+
+## Transportation 
+# Data source (who created it?)
+# The U.S. Enegry Information Association created this data set. 
+# Data description - what’s being measured?
+# This data set is meauring the amount of carbon dioxide emitted across the transportation sector over a period of almost 50 years. 
+# Data limitations (eg: are the data recent? do they contain all the variables you might want?)
+# This data is interesting because the most important aspect is the time. The only other aspect is by state. It certainly does not contain enough information on transportation CO2 emissions as a whole but provides a super intrigiuing looking into how it has changed over 50 years.   
+# Show the variable names. Describe the most useful / interesting ones.
+```{r}
+transportation[2,]
+transportation <- as.data.frame(transportation)
+```
+# The percent change from 1970-2019 is super helpful because it gives a snapshot of the changes that you can compare with the other states to see which have grow the most. 
+
+# Visualize one interesting variable.
+
+```{r}
+names(transportation) <- NULL
+head(transportation)
+```
+
+```{r}
+names(transportation) <- c("States", "seventy", "1971", "1972", "1973","1974","1975","1976",
+                   "1977", "1978", "1979", "eighty","1981","1983.000000",	"1984.00000",	"1985.00000",	"1986.00000",	"1987.000000","1988.00000","1989.00000",	"1990.00000",	"1991.00000",	"1992.00000",	"1993.00000",	"1994.00000",	"1995.00000",	"1996.00000",	"1997.00000","1998.00000",	"1999.00000",	"2000.00000",	"2001.00000",	"2002.00000",	"2003.00000",	"2004.00000",	"2005.00000",	"2006.00000",	"2007.00000",	"2008.00000"	,"2009.00000",	"2010.00000",	"2011.00000","2012.00000",	"2013.00000",	"2014.00000",	"2015.00000",	"2016.00000",	"2017.00000",	"2018.00000",	"2019.00000","Percent","Absolute"	)
+head(transportation)
+```
+
+```{r}
+transportation %>% 
+   ggplot() + 
+  geom_histogram(aes(x=Percent))
+
+```
+# These two data sets can be joined by their states. 
