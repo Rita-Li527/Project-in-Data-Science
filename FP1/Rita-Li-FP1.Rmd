@@ -1,0 +1,77 @@
+---
+title: "Rita Li FP1"
+author: "Rita Li"
+date: '2022-09-20'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Project Area
+Public Transportation
+
+## Members
+Jenny, Pippa, Rita
+
+
+## Research question
+- Where are there gaps in a public transportation system?
+- What are the connections between public transport systems and    environmental protection and emissions? 
+- How much money the government spends (or future spends) on transportation based on energy cost ?
+
+## Dataset
+```{r}
+library(tidyverse)     # for graphing and data cleaning
+library(lubridate)     # for date manipulation
+library(ggthemes)      # for even more plotting themes
+library(dplyr)
+library(maps)          # for map data
+library(ggmap)         # for mapping points on maps
+library(RColorBrewer)  # for color palettes
+library(sf)            # for working with spatial data
+library(readr)
+library(readxl)
+library(plotly)
+Sys.setlocale("LC_TIME", "English")
+theme_set(theme_minimal())
+```
+
+
+# Gas Price dataset
+```{r}
+gas <- read_csv("FP1/Rita-Li-FP1_datasets/Weekly_Minnesota_Regular_Conventional_Retail_Gasoline_Prices.csv", skip = 4)
+```
+## Data source
+[U.S. Energy Information Administration ](https://www.eia.gov/dnav/pet/hist/LeafHandler.ashx?n=PET&s=EMM_EPMRU_PTE_SMN_DPG&f=W)
+## Data description
+This is the dataset of weekly Minnesota regular conventional retail gasoline price.
+
+## Data limitations (eg: are the data recent? do they contain all variables you might want?)
+This dataset only have two variables: time and the price.
+## Visualize one interesting variable.
+
+
+# Metro Transit Ridership Dataset
+```{r}
+ridership2013 <- read_csv("FP1/Rita-Li-FP1_datasets/TransitStopsBoardingsAndAlightings2013.csv") %>% 
+  filter(Provider == "Metro Transit")
+```
+## Data source
+[Metropolitan Council](https://gisdata.mn.gov/dataset/us-mn-state-metc-trans-stop-boardings-alightings)
+
+## Data description
+Contains average daily transit boardings and alightings for all Metro Transit, Met Council, and Maple Grove Transit fixed-route transit service.
+
+## Data limitations 
+This only contains data from 2013 to 2021
+
+
+## Visualize one interesting variable.
+
+## Join datasets
+
+
+
+
