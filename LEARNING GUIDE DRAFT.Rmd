@@ -13,3 +13,176 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, error=TRUE, message=FALSE, warning=FALSE)
 ```
+
+
+```{r}
+library(tidyverse)     # for data cleaning and plotting
+library(gplots)        # for col2hex() function
+library(RColorBrewer)  # for color palettes
+library(sf)            # for working with spatial data
+library(leaflet)       # for highly customizable mapping
+library(carData)       # for Minneapolis police stops data
+library(ggthemes)      # for more themes (including theme_map())
+library(htmltools)
+theme_set(theme_minimal())
+```
+
+# Color
+
+```{r}
+# load continuous dataset
+data_site <- 
+  "https://www.macalester.edu/~dshuman1/data/112/2014-Q4-Trips-History-Data.rds" 
+Trips <- readRDS(gzcon(url(data_site)))
+Stations<-read_csv("http://www.macalester.edu/~dshuman1/data/112/DC-Stations.csv")
+
+departSta <- Trips %>%
+  left_join(Stations, by = c("sstation" = "name")) %>%
+  group_by(lat, long) %>%
+  summarise(EventsCount = n())
+```
+
+## Create Color Palette
+```{r}
+# Call the color function (colorNumeric) to create a new palette function
+pal <- colorNumeric(c("red", "green", "blue"), 1:10)
+# Pass the palette function a data vector to get the corresponding colors
+pal(c(1,6,9))
+# create another color palette function with the range of inputs (i.e. domain) 
+palDomain <- colorNumeric(
+  palette = "Blues",
+  domain = departSta$EventsCount)
+# Show the corresponding colors
+head(palDomain(departSta$EventsCount))
+```
+
+## Common parameters
+
+```{r}
+#RColorBrewer 
+palBre <- colorNumeric(
+  palette = "RdYlBu",
+  domain = departSta$EventsCount)
+
+#viridis
+palVir <- colorNumeric(
+  palette = "magma",
+  domain = departSta$EventsCount)
+
+#RGB or Named the colors: palette(), c("#000000", "#0000FF", "#FFFFFF"), topo.colors(10) etc
+
+#A function that receives a single value between 0 and 1 and returns a color: colorRamp(c("#000000", "#FFFFFF"), interpolate="spline") etc
+```
+
+## Continuous data
+
+```{r}
+#Continuous input, continuous colors (colorNumeric)
+palConC <- colorNumeric(
+  palette = "RdYlBu",
+  domain = departSta$EventsCount)
+
+#Continuous input, discrete colors (colorBin and colorQuantile)
+
+# colorBin:slicing the input domain up by value(bin)
+palBin<-colorBin("Blues", departSta$EventsCount, 5, pretty = FALSE)
+
+#colorQuantile: slicing the input domain into subsets with equal numbers of observations (by quantile)
+palQuan <- colorQuantile("Blues", departSta$EventsCount, n = 7)
+```
+
+
+```{r}
+# leaflet(data = departSta) %>%
+#   addProviderTiles(providers$CartoDB.DarkMatter) %>%
+#   addProviderTiles(providers$Stamen.TonerLines,
+#                    options = providerTileOptions(opacity = 0.35)) %>%
+#   addProviderTiles(providers$Stamen.TonerLabels) %>%
+#     addCircles(lng = ~long,
+#              lat = ~lat,
+#             #stroke width in pixels
+#              weight = 10,
+#             #changes transparency, like alpha in ggplot
+#              opacity = 1,
+#              color = ~palQuan(EventsCount))
+```
+
+## categorical data
+
+```{r}
+#Domain
+palFacD<-colorFactor(palette = "Blues", MplsStops$problem)
+#Level
+palFacL<-colorFactor(topo.colors(5),levels = MplsStops$problem)
+
+# leaflet(data = MplsStops) %>%
+#   addProviderTiles(providers$CartoDB.Positron) %>%
+#   addCircleMarkers(lng = ~long,
+#              lat = ~lat,
+#              weight = 1,
+#              opacity = 1,
+#              stroke = TRUE,
+#              color = ~palFacL(problem))
+```
+
+# Lines and Shape
+
+```{r}
+#rectangle
+leaflet(data = departSta) %>%
+  addProviderTiles(providers$CartoDB.DarkMatter) %>%
+  addProviderTiles(providers$Stamen.TonerLines,
+                   options = providerTileOptions(opacity = 0.35)) %>%
+  addProviderTiles(providers$Stamen.TonerLabels) %>%
+  addCircles(
+    lng = ~ long,
+    lat = ~ lat,
+    #stroke width in pixels
+    weight = 10,
+    #changes transparency, like alpha in ggplot
+    opacity = 1,
+    color = ~ palQuan(EventsCount)
+  ) %>%
+  addRectangles(
+    lng1 = -77.20250,
+    lat1 =38.80111,
+    lng2 =-76.93186,
+    lat2 = 39.12351,
+    fillColor = "transparent"
+  )
+
+#Polygons and Polylines
+leaflet(data = departSta) %>%
+  addProviderTiles(providers$CartoDB.DarkMatter) %>%
+  addProviderTiles(providers$Stamen.TonerLines,
+                   options = providerTileOptions(opacity = 0.35)) %>%
+  addProviderTiles(providers$Stamen.TonerLabels) %>%
+  addPolygons(
+    lng = ~ long,
+    lat = ~ lat,
+    # set the opacity of the outline
+    opacity = 1,
+    # set the stroke width in pixels
+    weight = 1,
+    # set the fill opacity
+    fillOpacity = 0.6
+  )
+```
+
+# Legend
+
+```{r}
+leaflet(data = MplsStops) %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%
+  addCircleMarkers(lng = ~long,
+             lat = ~lat,
+             weight = 1,
+             opacity = 1,
+             stroke = TRUE,
+             color = ~palFacL(problem)) %>% 
+    addLegend(position = "bottomleft", 
+            pal = palFacL,
+            values = ~problem,
+             title = "Type of Stops") 
+```
+
