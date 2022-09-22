@@ -15,6 +15,9 @@ knitr::opts_chunk$set(echo = TRUE, error=TRUE, message=FALSE, warning=FALSE)
 ```
 
 # Introduction
+Leaflet is one of the most popular open-source JavaScript libraries for interactive maps. It’s used by websites ranging from The New York Times and The Washington Post to GitHub and Flickr, as well as GIS specialists like OpenStreetMap, Mapbox, and CartoDB.
+
+This R package makes it easy to integrate and control Leaflet maps in R.
 
 ```{r}
 library(tidyverse)     # for data cleaning and plotting
@@ -397,6 +400,7 @@ leaflet(states) %>%
       dashArray = "",
       fillOpacity = 0.7,
       bringToFront = TRUE),
+    # add labels
     label = labels,
     labelOptions = labelOptions(
       style = list("font-weight" = "normal", padding = "3px 8px"),
