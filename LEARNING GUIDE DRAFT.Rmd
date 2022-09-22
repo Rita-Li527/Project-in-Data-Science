@@ -178,6 +178,8 @@ leaflet(bftemp) %>%
   
 # Color
 
+> Instead of using color as in the ggplot, we will use color palette for leaflet. In the palette, you call 1) the colors you want to use and 2) optionally, the range of inputs (i.e. domain) that are expected. The color function returns a palette function that can be passed a vector of input values, and it’ll return a vector of colors in #RRGGBB(AA) format.There are currently three color functions for dealing with continuous input: colorNumeric, colorBin, and colorQuantile; and one for categorical input, colorFactor.
+
 ```{r}
 # load continuous dataset
 data_site <- 
@@ -192,6 +194,9 @@ departSta <- Trips %>%
 ```
 
 ## Create Color Palette
+
+> domain arguement is optional, it tells the color function the range of input values( the specific variable you want to include).If you use a palette function multiple times across different data, it’s important to provide a non-NULL value for domain so the scaling between data and colors is consistent.
+
 ```{r}
 # Call the color function (colorNumeric) to create a new palette function
 pal <- colorNumeric(c("red", "green", "blue"), 1:10)
@@ -241,40 +246,61 @@ palQuan <- colorQuantile("Blues", departSta$EventsCount, n = 7)
 ```
 
 
-```{r}
-# leaflet(data = departSta) %>%
-#   addProviderTiles(providers$CartoDB.DarkMatter) %>%
-#   addProviderTiles(providers$Stamen.TonerLines,
-#                    options = providerTileOptions(opacity = 0.35)) %>%
-#   addProviderTiles(providers$Stamen.TonerLabels) %>%
-#     addCircles(lng = ~long,
-#              lat = ~lat,
-#             #stroke width in pixels
-#              weight = 10,
-#             #changes transparency, like alpha in ggplot
-#              opacity = 1,
-#              color = ~palQuan(EventsCount))
+```{r example}
+# colorBin
+leaflet(data = departSta) %>%
+  addProviderTiles(providers$CartoDB.DarkMatter) %>%
+  addProviderTiles(providers$Stamen.TonerLines,
+                   options = providerTileOptions(opacity = 0.35)) %>%
+  addProviderTiles(providers$Stamen.TonerLabels) %>%
+    addCircles(lng = ~long,
+             lat = ~lat,
+            #stroke width in pixels
+             weight = 10,
+            #changes transparency, like alpha in ggplot
+             opacity = 1,
+             color = ~palBin(EventsCount))
+# colorQuantile
+leaflet(data = departSta) %>%
+  addProviderTiles(providers$CartoDB.DarkMatter) %>%
+  addProviderTiles(providers$Stamen.TonerLines,
+                   options = providerTileOptions(opacity = 0.35)) %>%
+  addProviderTiles(providers$Stamen.TonerLabels) %>%
+    addCircles(lng = ~long,
+             lat = ~lat,
+            #stroke width in pixels
+             weight = 10,
+            #changes transparency, like alpha in ggplot
+             opacity = 1,
+             color = ~palQuan(EventsCount))
 ```
 
 ## categorical data
+
+> For categorical data, you will use the colorFactor function. If you want to specify the input domain, you can either by passing a factor or character vector to domain, or by providing levels directly using the levels parameter (in which case the domain will be ignored).
 
 ```{r}
 #Domain
 palFacD<-colorFactor(palette = "Blues", MplsStops$problem)
 #Level
 palFacL<-colorFactor(topo.colors(5),levels = MplsStops$problem)
+```
 
-# leaflet(data = MplsStops) %>%
-#   addProviderTiles(providers$CartoDB.Positron) %>%
-#   addCircleMarkers(lng = ~long,
-#              lat = ~lat,
-#              weight = 1,
-#              opacity = 1,
-#              stroke = TRUE,
-#              color = ~palFacL(problem))
+```{r example}
+leaflet(data = MplsStops) %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%
+  addCircleMarkers(lng = ~long,
+             lat = ~lat,
+             weight = 1,
+             opacity = 1,
+             stroke = TRUE,
+             color = ~palFacL(problem))
 ```
 
 # Lines and Shape
+
+> For creating a rectangle, the four vector arguments indicating its four angles are required.While the Polygons and Polylines are more flexible and can be inferred from the data object.
+
 
 ```{r}
 #rectangle
@@ -320,7 +346,10 @@ leaflet(data = departSta) %>%
 
 # Legend
 
-```{r}
+> addLegend() function is aware of the different types of palette functions, and will create an appropriate default rendering for each type.Thus, you do not need to edit it manully when changing the domain or other scales.
+
+
+```{r example}
 leaflet(data = MplsStops) %>%
   addProviderTiles(providers$CartoDB.Positron) %>%
   addCircleMarkers(lng = ~long,
