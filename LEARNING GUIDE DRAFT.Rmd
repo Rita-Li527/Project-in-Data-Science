@@ -22,15 +22,142 @@ library(RColorBrewer)  # for color palettes
 library(sf)            # for working with spatial data
 library(leaflet)       # for highly customizable mapping
 library(carData)       # for Minneapolis police stops data
+library(tidytuesdayR)  # for bigfoot data 
 library(ggthemes)      # for more themes (including theme_map())
 library(htmltools)
 theme_set(theme_minimal())
 ```
-# Introduction
-Leaflet is one of the most popular open-source JavaScript libraries for interactive maps. It’s used by websites ranging from The New York Times and The Washington Post to GitHub and Flickr, as well as GIS specialists like OpenStreetMap, Mapbox, and CartoDB.
+# Basemaps
 
-This R package makes it easy to integrate and control Leaflet maps in R.
+We are gonna start from the bottokm layer up. The first thing to look it is the basemaps. This means, what will be behind your points or shapes. There are many options and they are super easy to load in. 
+We can start off with the basic basic map, simpple blue ocean and white land, if you zoom in there will be more detials
 
+```{r}
+leaflet() %>% 
+  addTiles()
+```
+
+We can also start the map zoomed in on a specific area using latitude and longitude and the setView() function 
+
+Here is Saint Paul MN, now look up your hometown and practice puting in the coordinates. 
+
+```{r}
+leaflet() %>% 
+  addTiles() %>% 
+  setView(lng = -93.093124, lat = 44.949642, zoom = 12)
+  
+```
+
+```{r}
+hometown <- leaflet() %>% 
+  setView(lng = -93.093124, lat = 44.949642, zoom = 12) %>% 
+    addTiles()
+  
+```
+
+There are many other basemaps you can use in leaflet! 
+To get different basemaps use the function addProviderTiles(), you will need to know the name of the basemap 
+Here are some examples: 
+
+```{r}
+hometown %>% 
+    addProviderTiles(providers$CartoDB.Positron)
+```
+
+```{r}
+hometown %>% 
+    addProviderTiles(providers$Stamen.Watercolor)
+```
+
+```{r}
+hometown %>% 
+    addProviderTiles(providers$CartoDB.DarkMatterNoLabels)
+```
+
+To get the full list of basemaps available through this function click here: http://leaflet-extras.github.io/leaflet-providers/preview/index.html 
+
+Let say you really like the water color basemap but there arent any labels, you can layer base maps. Here I have layed the water color with the light grey basemap that had labels. As long as you set the one on top to have a lower opacity you can see both!  
+
+```{r}
+hometown %>% addProviderTiles(providers$Stamen.Watercolor) %>%
+  addProviderTiles(providers$CartoDB.Positron,
+    options = providerTileOptions(opacity = 0.5)) 
+ 
+```
+
+# Markers 
+
+Now we have our basemap figured out whe can add markers. To do that we will needed data and the observation should have a latitude and longitdue variable to put them on the map. 
+
+```{r}
+tuesdata <- tidytuesdayR::tt_load('2022-09-13') #Loading in data from a tidy tuesday that has geographical points
+bigfoot <- tuesdata$bigfoot
+```
+
+```{r}
+leaflet(data = bigfoot) %>% addTiles() %>%
+  addMarkers(~longitude, ~latitude)
+```
+
+If R is running slowly now its probably becuase there are so many data points. It is best to filter out observations that you need before making a map. 
+
+```{r}
+bigfootsub <- bigfoot %>% 
+  filter(season == "Summer")
+```
+
+```{r}
+leaflet(data = bigfootsub) %>% addTiles() %>%
+  addMarkers(~longitude, ~latitude)
+```
+With less points the software runs far smoother. Now we can add some fun things! 
+
+# Plain Markers and Popups
+Not only can you add labels to these points but with leaflet you can add popups 
+```{r}
+leaflet(data = bigfootsub) %>% 
+  addProviderTiles(providers$CartoDB.Positron) %>% #Changing basemap to something more neutral 
+  addMarkers(~longitude, ~latitude,label = ~date, popup = ~location_details) # label means what will appear when you hover over the point and popup means what will appear when you click on a point
+```
+
+# Awesome Markers
+Awesome markers allow you to change the color of the marker dependent on a variable 
+```{r}
+# After choosing temperature_high to be my variable I am visualizing I am going to filter out any observations that do not have a value for temperature_high
+bftemp <- bigfootsub %>% 
+  filter(temperature_high != "NA")
+bftemp
+```
+
+
+```{r}
+
+#Then we will need to assign values of temperature_high  to colors creating a getColor function 
+
+getColor <- function(bftemp) {
+  sapply(bftemp$temperature_high, function(temperature_high){
+  if(temperature_high <= 68) { 
+    "blue"
+  } else if(temperature_high >= 69) {
+    "red"
+  } else {
+    "green"
+  } })
+}
+
+icons <- awesomeIcons(
+  icon = 'ios-close',
+  iconColor = 'pink', #Controls color of middle x 
+  library = 'ion',
+  markerColor = getColor(bftemp) #Calls the function 
+)
+
+leaflet(bftemp) %>% 
+  addProviderTiles(providers$CartoDB.Positron) %>% 
+  addAwesomeMarkers(~longitude, ~latitude,label = ~date, popup = ~location_details, icon = icons) #make sure to set the icons
+```
+
+<<<<<<< HEAD
 ## Features
 Interactive panning/zooming
   *Compose maps using arbitrary combinations of:
@@ -47,6 +174,8 @@ Interactive panning/zooming
   *Display maps in non spherical mercator projections
   *Augment map features using chosen plugins from leaflet plugins repository
   
+=======
+>>>>>>> 6d7c30f692739d50a7efd5108d988576881028be
 # Color
 
 ```{r}
