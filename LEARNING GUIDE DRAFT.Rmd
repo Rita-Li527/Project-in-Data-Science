@@ -33,19 +33,20 @@ This R package makes it easy to integrate and control Leaflet maps in R.
 
 ## Features
 Interactive panning/zooming
-*Compose maps using arbitrary combinations of:
-·Map tiles
-·Markers
-·Polygons
-·Lines
-·Popups
-·GeoJSON
-*Create maps right from the R console or RStudio
-*Embed maps in knitr/R Markdown documents and Shiny apps
-*Easily render spatial objects from the sp or sf packages, or data frames with latitude/longitude columns
-*Use map bounds and mouse events to drive Shiny logic
-*Display maps in non spherical mercator projections
-*Augment map features using chosen plugins from leaflet plugins repository
+  *Compose maps using arbitrary combinations of:
+      ·Map tiles
+      ·Markers
+      ·Polygons
+      ·Lines
+      ·Popups
+      ·GeoJSON
+  *Create maps right from the R console or RStudio
+  *Embed maps in knitr/R Markdown documents and Shiny apps
+  *Easily render spatial objects from the sp or sf packages, or data frames with latitude/longitude columns
+  *Use map bounds and mouse events to drive Shiny logic
+  *Display maps in non spherical mercator projections
+  *Augment map features using chosen plugins from leaflet plugins repository
+  
 # Color
 
 ```{r}
@@ -205,3 +206,42 @@ leaflet(data = MplsStops) %>%
              title = "Type of Stops") 
 ```
 
+
+# Choropleth Map
+
+```{r}
+states <- geojsonio::geojson_read("https://rstudio.github.io/leaflet/json/us-states.geojson", what = "sp")
+
+bins <- c(0, 10, 20, 50, 100, 200, 500, 1000, Inf)
+pal <- colorBin("YlOrRd", domain = states$density, bins = bins)
+
+labels <- sprintf(
+  "<strong>%s</strong><br/>%g people / mi<sup>2</sup>",
+  states$name, states$density
+) %>% lapply(htmltools::HTML)
+
+leaflet(states) %>%
+  setView(-96, 37.8, 4) %>%
+  addProviderTiles("MapBox", options = providerTileOptions(
+    id = "mapbox.light",
+    accessToken = Sys.getenv('MAPBOX_ACCESS_TOKEN'))) %>% 
+  addPolygons(
+    fillColor = ~pal(density),
+    weight = 2,
+    opacity = 1,
+    color = "white",
+    dashArray = "3",
+    fillOpacity = 0.7,
+    # hightlight the polygon when curse over it
+    highlightOptions = highlightOptions(
+      weight = 5,
+      color = "#666",
+      dashArray = "",
+      fillOpacity = 0.7,
+      bringToFront = TRUE),
+    label = labels,
+    labelOptions = labelOptions(
+      style = list("font-weight" = "normal", padding = "3px 8px"),
+      textsize = "15px",
+      direction = "auto"))
+```
