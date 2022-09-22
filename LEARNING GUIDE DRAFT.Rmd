@@ -14,6 +14,7 @@ output:
 knitr::opts_chunk$set(echo = TRUE, error=TRUE, message=FALSE, warning=FALSE)
 ```
 
+# Introduction
 
 ```{r}
 library(tidyverse)     # for data cleaning and plotting
@@ -27,6 +28,24 @@ library(ggthemes)      # for more themes (including theme_map())
 library(htmltools)
 theme_set(theme_minimal())
 ```
+
+## Features
+Interactive panning/zooming
+  *Compose maps using arbitrary combinations of:
+      ·Map tiles
+      ·Markers
+      ·Polygons
+      ·Lines
+      ·Popups
+      ·GeoJSON
+  *Create maps right from the R console or RStudio
+  *Embed maps in knitr/R Markdown documents and Shiny apps
+  *Easily render spatial objects from the sp or sf packages, or data frames with latitude/longitude columns
+  *Use map bounds and mouse events to drive Shiny logic
+  *Display maps in non spherical mercator projections
+  *Augment map features using chosen plugins from leaflet plugins repository
+
+
 # Basemaps
 
 We are gonna start from the bottokm layer up. The first thing to look it is the basemaps. This means, what will be behind your points or shapes. There are many options and they are super easy to load in. 
@@ -156,26 +175,7 @@ leaflet(bftemp) %>%
   addProviderTiles(providers$CartoDB.Positron) %>% 
   addAwesomeMarkers(~longitude, ~latitude,label = ~date, popup = ~location_details, icon = icons) #make sure to set the icons
 ```
-
-<<<<<<< HEAD
-## Features
-Interactive panning/zooming
-  *Compose maps using arbitrary combinations of:
-      ·Map tiles
-      ·Markers
-      ·Polygons
-      ·Lines
-      ·Popups
-      ·GeoJSON
-  *Create maps right from the R console or RStudio
-  *Embed maps in knitr/R Markdown documents and Shiny apps
-  *Easily render spatial objects from the sp or sf packages, or data frames with latitude/longitude columns
-  *Use map bounds and mouse events to drive Shiny logic
-  *Display maps in non spherical mercator projections
-  *Augment map features using chosen plugins from leaflet plugins repository
   
-=======
->>>>>>> 6d7c30f692739d50a7efd5108d988576881028be
 # Color
 
 ```{r}
