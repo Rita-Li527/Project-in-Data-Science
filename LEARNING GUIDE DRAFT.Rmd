@@ -286,7 +286,7 @@ palFacD<-colorFactor(palette = "Blues", MplsStops$problem)
 palFacL<-colorFactor(topo.colors(5),levels = MplsStops$problem)
 ```
 
-```{r example}
+```{r categorical example}
 leaflet(data = MplsStops) %>%
   addProviderTiles(providers$CartoDB.Positron) %>%
   addCircleMarkers(lng = ~long,
@@ -349,7 +349,7 @@ leaflet(data = departSta) %>%
 > addLegend() function is aware of the different types of palette functions, and will create an appropriate default rendering for each type.Thus, you do not need to edit it manully when changing the domain or other scales.
 
 
-```{r example}
+```{r legend example}
 leaflet(data = MplsStops) %>%
   addProviderTiles(providers$CartoDB.Positron) %>%
   addCircleMarkers(lng = ~long,
