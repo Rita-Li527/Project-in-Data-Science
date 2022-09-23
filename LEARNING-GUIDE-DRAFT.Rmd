@@ -181,7 +181,7 @@ leaflet(bftemp) %>%
   
 # Color
 
-> Instead of using color as in the ggplot, we will use color palette for leaflet. In the palette, you call 1) the colors you want to use and 2) optionally, the range of inputs (i.e. domain) that are expected. The color function returns a palette function that can be passed a vector of input values, and it’ll return a vector of colors in #RRGGBB(AA) format.There are currently three color functions for dealing with continuous input: colorNumeric, colorBin, and colorQuantile; and one for categorical input, colorFactor.
+> Colors in leaflet need to be in “hex” form. Thus, instead of using color directly as in ggplot, we will use color functions which could help us create "hex" color. The color function returns a palette function that can be passed a vector of input values, and it’ll return a vector of colors in #RRGGBB(AA) format.There are currently three color functions for dealing with continuous input: colorNumeric, colorBin, and colorQuantile; and one for categorical input, colorFactor.
 
 ```{r}
 # load continuous dataset
@@ -198,7 +198,9 @@ departSta <- Trips %>%
 
 ## Create Color Palette
 
-> domain arguement is optional, it tells the color function the range of input values( the specific variable you want to include).If you use a palette function multiple times across different data, it’s important to provide a non-NULL value for domain so the scaling between data and colors is consistent.
+>  To create a color palette(palette function): you call 1) the color function with colors (palette) you want to use and 2) optionally, the domain (the specific variable you want to include) that are expected. The color function (i.e. colorNumeric) returns a function that maps a variable’s values to colors in the given palette, in one of the examples below is "Blues". So, pal() is a function. We can then use that function inside other functions where you want colors. 
+
+> Notice that though the domain arguement is optional, it’s important to provide a non-NULL value for domain if you use a palette function multiple times across different data so the scaling between data and colors is consistent.
 
 ```{r}
 # Call the color function (colorNumeric) to create a new palette function
@@ -213,7 +215,14 @@ palDomain <- colorNumeric(
 head(palDomain(departSta$EventsCount))
 ```
 
-## Common parameters
+## Common Parameters
+
+> The palette argument specifies the colors to map the data. Here shows the four most common forms.
+
+- [RColorBrewer ](https://r-graph-gallery.com/38-rcolorbrewers-palettes.html)
+- [viridis](https://cran.r-project.org/web/packages/viridis/vignettes/intro-to-viridis.html)
+- RGB or Named the colors
+- A function that receives a single value between 0 and 1 and returns a color
 
 ```{r}
 #RColorBrewer 
@@ -231,7 +240,9 @@ palVir <- colorNumeric(
 #A function that receives a single value between 0 and 1 and returns a color: colorRamp(c("#000000", "#FFFFFF"), interpolate="spline") etc
 ```
 
-## Continuous data
+## Continuous Data
+
+> To color continuous data, there are three available color functions: colorNumeric, colorBin, and colorQuantile.
 
 ```{r}
 #Continuous input, continuous colors (colorNumeric)
@@ -248,8 +259,9 @@ palBin<-colorBin("Blues", departSta$EventsCount, 5, pretty = FALSE)
 palQuan <- colorQuantile("Blues", departSta$EventsCount, n = 7)
 ```
 
+### Continuous Data Example
 
-```{r example}
+```{r}
 # colorBin
 leaflet(data = departSta) %>%
   addProviderTiles(providers$CartoDB.DarkMatter) %>%
@@ -278,7 +290,7 @@ leaflet(data = departSta) %>%
              color = ~palQuan(EventsCount))
 ```
 
-## categorical data
+## Categorical Data
 
 > For categorical data, you will use the colorFactor function. If you want to specify the input domain, you can either by passing a factor or character vector to domain, or by providing levels directly using the levels parameter (in which case the domain will be ignored).
 
@@ -289,7 +301,9 @@ palFacD<-colorFactor(palette = "Blues", MplsStops$problem)
 palFacL<-colorFactor(topo.colors(5),levels = MplsStops$problem)
 ```
 
-```{r categorical example}
+### Categorical Example
+
+```{r}
 leaflet(data = MplsStops) %>%
   addProviderTiles(providers$CartoDB.Positron) %>%
   addCircleMarkers(lng = ~long,
