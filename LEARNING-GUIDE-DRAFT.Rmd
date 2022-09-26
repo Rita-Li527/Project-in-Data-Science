@@ -1,5 +1,5 @@
 ---
-title: 'Learning Guide Draft'
+title: 'A Guide to Leaflet'
 author: "Pippa,Rita,Jenny"
 output: 
   html_document:
@@ -49,19 +49,19 @@ Interactive panning/zooming
   *Augment map features using chosen plugins from leaflet plugins repository
 
 
-# Basemaps
+# Base maps
 
-We are gonna start from the bottokm layer up. The first thing to look it is the basemaps. This means, what will be behind your points or shapes. There are many options and they are super easy to load in. 
-We can start off with the basic basic map, simpple blue ocean and white land, if you zoom in there will be more detials
+>We are gonna start from the bottom layer up. The first thing to look it is the base maps. This means, what will be behind your points or shapes. There are many options and they are super easy to load in. 
+We can start off with the basic basic map, simple blue ocean and white land, if you zoom in there will be more detials
 
 ```{r}
 leaflet() %>% 
   addTiles()
 ```
 
-We can also start the map zoomed in on a specific area using latitude and longitude and the setView() function 
+>We can also start the map zoomed in on a specific area using latitude and longitude and the setView() function 
 
-Here is Saint Paul MN, now look up your hometown and practice puting in the coordinates. 
+>Here is Saint Paul MN, now look up your hometown and practice putting in the coordinates. 
 
 ```{r}
 leaflet() %>% 
@@ -77,13 +77,13 @@ hometown <- leaflet() %>%
   
 ```
 
-There are many other basemaps you can use in leaflet! 
-To get different basemaps use the function addProviderTiles(), you will need to know the name of the basemap 
+>There are many other base maps you can use in leaflet! 
+To get different base maps use the function addProviderTiles(), you will need to know the name of the basemap 
 Here are some examples: 
 
 ```{r}
 hometown %>% 
-    addProviderTiles(providers$CartoDB.Positron)
+    addProviderTiles(providers$CartoDB.Positron) 
 ```
 
 ```{r}
@@ -96,9 +96,11 @@ hometown %>%
     addProviderTiles(providers$CartoDB.DarkMatterNoLabels)
 ```
 
-To get the full list of basemaps available through this function click here: http://leaflet-extras.github.io/leaflet-providers/preview/index.html 
+>To get the full list of base maps available through this function click here: http://leaflet-extras.github.io/leaflet-providers/preview/index.html 
 
-Let say you really like the water color basemap but there arent any labels, you can layer base maps. Here I have layed the water color with the light grey basemap that had labels. As long as you set the one on top to have a lower opacity you can see both!  
+>If you want to use any other ones from this website just replace what is after the $ in the addProviderTiles(). 
+
+>Let say you really like the water color base map but there aren't any labels, you can add layers to your base maps. Here I have layered the water color with the light grey base map that had labels. As long as you set the one on top to have a lower opacity you can see both!  
 
 ```{r}
 hometown %>% addProviderTiles(providers$Stamen.Watercolor) %>%
@@ -107,48 +109,70 @@ hometown %>% addProviderTiles(providers$Stamen.Watercolor) %>%
  
 ```
 
-# Markers 
+>Try experimenting with the opacity and different layering techniques with base maps that you like! 
 
-Now we have our basemap figured out whe can add markers. To do that we will needed data and the observation should have a latitude and longitdue variable to put them on the map. 
+```{r}
+#hometown %>% addProviderTiles(providers$__________) %>%
+  #addProviderTiles(providers$______,
+    #options = providerTileOptions(opacity = ___)) 
+```
+
+
+
+## Markers 
+
+>Now we have our base map figured out we can add markers. To do that, we will needed data. The best data to use is data where the observations should have a latitude and longitude variable. This makes for a smooth process when adding markers. 
 
 ```{r}
 tuesdata <- tidytuesdayR::tt_load('2022-09-13') #Loading in data from a tidy tuesday that has geographical points
 bigfoot <- tuesdata$bigfoot
 ```
 
+>First lets practice adding all the data.
+
 ```{r}
-leaflet(data = bigfoot) %>% addTiles() %>%
+leaflet(data = bigfoot) %>% addProviderTiles(providers$Stamen.Watercolor) %>%
+  addProviderTiles(providers$CartoDB.Positron,
+    options = providerTileOptions(opacity = 0.5))  %>%
   addMarkers(~longitude, ~latitude)
 ```
 
-If R is running slowly now its probably becuase there are so many data points. It is best to filter out observations that you need before making a map. 
+>If R is running slowly now its because there are so many data points. It is best to filter out observations that you need before making a map. 
 
 ```{r}
 bigfootsub <- bigfoot %>% 
-  filter(season == "Summer")
+  filter(state == "California") %>% #Narrowing down to a state, pick any state you want! 
+  filter(season == "Summer") # Also only looking at bigfoot sightings during one season 
 ```
 
 ```{r}
-leaflet(data = bigfootsub) %>% addTiles() %>%
+leaflet(data = bigfootsub) %>% addProviderTiles(providers$Stamen.Watercolor) %>%
+  addProviderTiles(providers$CartoDB.Positron,
+    options = providerTileOptions(opacity = 0.5))  %>%
   addMarkers(~longitude, ~latitude)
 ```
-With less points the software runs far smoother. Now we can add some fun things! 
+
+>With less points the software runs far smoother. Now we can add some fun things! 
 
 # Plain Markers and Popups
-Not only can you add labels to these points but with leaflet you can add popups 
+
+>Not only can you add labels to these points but with leaflet you can add popups 
+
 ```{r}
 leaflet(data = bigfootsub) %>% 
-  addProviderTiles(providers$CartoDB.Positron) %>% #Changing basemap to something more neutral 
+  addProviderTiles(providers$Stamen.Watercolor) %>%
+  addProviderTiles(providers$CartoDB.Positron,
+    options = providerTileOptions(opacity = 0.5)) %>% 
   addMarkers(~longitude, ~latitude,label = ~date, popup = ~location_details) # label means what will appear when you hover over the point and popup means what will appear when you click on a point
 ```
 
 # Awesome Markers
-Awesome markers allow you to change the color of the marker dependent on a variable 
+> Awesome markers allow you to change the color of the marker dependent on a variable 
+
 ```{r}
 # After choosing temperature_high to be my variable I am visualizing I am going to filter out any observations that do not have a value for temperature_high
 bftemp <- bigfootsub %>% 
   filter(temperature_high != "NA")
-bftemp
 ```
 
 
@@ -157,8 +181,8 @@ bftemp
 #Then we will need to assign values of temperature_high  to colors creating a getColor function 
 
 getColor <- function(bftemp) {
-  sapply(bftemp$temperature_high, function(temperature_high){
-  if(temperature_high <= 68) { 
+  sapply(bftemp$temperature_high, function(temperature_high){ # Creating a function using the bftemp data and temperature_high data 
+  if(temperature_high <= 68) { #creating an if else statement to make the marker a certain color based on temperature 
     "blue"
   } else if(temperature_high >= 69) {
     "red"
@@ -175,7 +199,9 @@ icons <- awesomeIcons(
 )
 
 leaflet(bftemp) %>% 
-  addProviderTiles(providers$CartoDB.Positron) %>% 
+  addProviderTiles(providers$Stamen.Watercolor) %>%
+  addProviderTiles(providers$CartoDB.Positron,
+    options = providerTileOptions(opacity = 0.5))  %>% 
   addAwesomeMarkers(~longitude, ~latitude,label = ~date, popup = ~location_details, icon = icons) #make sure to set the icons
 ```
   
