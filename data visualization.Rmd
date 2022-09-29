@@ -1,0 +1,28 @@
+---
+title: "FP2: One visualization"
+author: "Pippa, Jenny, Jordanella, Rita"
+date: '2022-09-29'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(dbplyr)
+library(tidyverse)
+
+
+data <- read_csv("FP1/Rita-Li-FP1_datasets/bus-stops-Oct-2017.csv")
+
+library(readr)
+ridership<- read_csv("FP1/Rita-Li-FP1_datasets/ridership-route-day-Jan2014-Oct2017.csv")
+```
+
+```{r}
+twincitydata <- data %>% 
+  filter(city_id %in% c("MINNEAPOLIS","SAINT PAUL"))
+
+twincitydata
+```
