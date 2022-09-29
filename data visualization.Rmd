@@ -2,27 +2,66 @@
 title: "FP2: One visualization"
 author: "Pippa, Jenny, Jordanella, Rita"
 date: '2022-09-29'
-output: html_document
+output: 
+  html_document:
+    toc: TRUE
+    toc_float: TRUE
+    theme: simplex
+    df_print: paged
+    code_download: true
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r}
+```{r,message=FALSE,echo=FALSE,warning=FALSE}
 library(dbplyr)
 library(tidyverse)
+library(lubridate)
 
 
-data <- read_csv("FP1/Rita-Li-FP1_datasets/bus-stops-Oct-2017.csv")
+data <- read_csv("bus-stops-Oct-2017.csv")
 
 library(readr)
-ridership<- read_csv("FP1/Rita-Li-FP1_datasets/ridership-route-day-Jan2014-Oct2017.csv")
+ridership<- read_csv("ridership-route-day-Jan2014-Oct2017.csv")
+
+gas <- read_csv("FP1/Rita-Li-FP1_datasets/Weekly_Minnesota_Regular_Conventional_Retail_Gasoline_Prices.csv", skip = 4)
+```
+# Data preparation
+```{r, warning=FALSE}
+gas_fixed <- gas %>% 
+  mutate(date = as.Date(`Week of`, "%m/%d/%Y")) %>% 
+  mutate(gas_price = `Weekly Minnesota Regular Conventional Retail Gasoline Prices Dollars per Gallon`) %>% 
+  select(date, gas_price)
 ```
 
-```{r}
-twincitydata <- data %>% 
-  filter(city_id %in% c("MINNEAPOLIS","SAINT PAUL"))
-
-twincitydata
+# Data Visualization
+```{r, fig.width=7,fig.height=3,message=FALSE}
+coef <- 60
+ridership %>% 
+  filter(Route == 63) %>% 
+  mutate(date = as.Date(dtDate)) %>%
+  left_join(gas_fixed, by = "date") %>% 
+  mutate(month = month(date),year = year(date)) %>% 
+  group_by(year,month) %>% 
+  summarise(riders = sum(Total_Riders)/1000, gas_price = mean(gas_price,na.rm = TRUE), date = min(date)) %>% 
+  ggplot(aes(x = date))+
+  geom_line(aes(y = gas_price),color = "#9F2C2C")+
+  geom_line(aes(y = riders/coef),color = "#3F4345")+ 
+  scale_y_continuous(
+    name = "Gas Price($)",
+    sec.axis = sec_axis(trans = ~.*coef, name="Total Riders(thousands)"))+
+  labs(title = "Change of Gas Price and Total Rides of Route 63 over time",
+       subtitle = "From 2014 to 2017")+
+  geom_text(aes(x = date("2017-06-01"), y = 2.4), label = "Gas Price",color = "#9F2C2C",size = 3)+
+  geom_text(aes(x = date("2017-06-01"), y = 1.7), label = "Total Riders",color = "#3F4345",size = 3)+
+  theme_minimal()+
+  theme(axis.title.y.left = element_text(color = "#9F2C2C",size = 12),
+        axis.title.y.right = element_text(color = "#3F4345",size = 12),
+        axis.text.y.left = element_text(color = "#9F2C2C",size = 8),
+        axis.text.y.right = element_text(color = "#3F4345",size = 8),
+        axis.title.x.bottom = element_blank(),
+        plot.title = element_text(color = "#006bb3",size = 14),
+        plot.subtitle = element_text(color = "#006bb3"))
 ```
