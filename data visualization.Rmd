@@ -65,3 +65,11 @@ ridership %>%
         plot.title = element_text(color = "#006bb3",size = 14),
         plot.subtitle = element_text(color = "#006bb3"))
 ```
+
+> Gas price, a term that would be directly related to transportation. Ridership, a term very closely related to transportation but not gas price. Bridged together by transportation, indicating that there might exist some influence between the two terms. Thus, we decided to investigate the relationship between gas price and ridership over time, which might help the bus company to make their future decision when the gas price was fluent.
+
+> The red line with its legend on the left side represents the gas price whereas the black line with its legend on the right side represents the ridership. It is based on the data collected from 2014 through 2017. Though a little outdated but still worth studying. 
+
+> Starting from 2015, the pattern between the two lines became similar. Notice that, the red line, which represents the ridership almost always changes a little slower than the black line, the gas price. Such cases might indicate that the public needs time to make their discussion and react to the fluctuation of the gas price. 2016 and 2014 are two outliers lying in the graph. The dramatic gap shrink between the two lines during 2014 might reflect the policy of the state trying to promote the situation for public transportation. While in 2016, the overlap of the two lines seems to be a result of impact outside the transportation system, such as the decreasing price of the private car.
+
+> The bus company would be one of the targets for this visualization. As mentioned before, such visualization might help predict the total riders in public transportation based on the gas price. Therefore, the company is able to utilize that data to adjust their schedule and frequency of the bus which might not only increase the efficiency but also lower the potential waste for empty buses.
